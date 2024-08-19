@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  web:
+    build: ./frontend
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend:/app
+
+  api:
+    build: ./backend
+    ports:
+      - 8000:8000
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+    volumes:
+      - ./backend:/app
+
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgresDB:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisDB:/data
+
+volumes:
+  postgresDB:
+  redisDB:
